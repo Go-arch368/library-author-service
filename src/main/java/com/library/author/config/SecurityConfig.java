@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -15,13 +16,22 @@ public class SecurityConfig {
     @Autowired
     private JwtFilter jwtFilter;
 
+    // ✅ This stops Spring from using InMemoryUserDetailsManager!
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return username -> {
+            throw new UnsupportedOperationException(
+                    "UserDetailsService not needed in Author Service!");
+        };
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)
             throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().authenticated() // ✅ all routes protected
+                        .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
